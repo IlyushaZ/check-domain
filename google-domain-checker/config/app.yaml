@@ -1,0 +1,7 @@
+db_string: 'host=postgres port=5432 user=root password=root dbname=domain-checker sslmode=disable'
+migrations_dir: "./migration"
+port: 8084
+serp_stack_api_key: ''
+rabbitmq:
+  url: 'amqp://rabbit:rabbit@rabbit/'
+  queue_name: 'notifications'
