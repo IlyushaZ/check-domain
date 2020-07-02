@@ -52,13 +52,13 @@ func UnprocessableEntity(message string) APIError {
 func Internal() APIError {
 	return APIError{
 		Code:    http.StatusInternalServerError,
-		Message: "Something went wrong",
+		Message: "something went wrong",
 	}
 }
 
 func MethodNotAllowed(got, allowed string) APIError {
 	return APIError{
 		Code:    http.StatusMethodNotAllowed,
-		Message: fmt.Sprintf("Method %s is not allowed. Allowed method: %s", got, allowed),
+		Message: fmt.Sprintf("method %s is not allowed. allowed method: %s", got, allowed),
 	}
 }
