@@ -42,7 +42,7 @@ func (r repository) Update(task entity.Task) error {
 
 func (r repository) GetUnprocessed() []entity.Task {
 	var tasks []entity.Task
-	stmt := "SELECT * FROM tasks WHERE process_at <= NOW()"
+	stmt := "SELECT * FROM tasks WHERE process_at <= NOW() LIMIT 200"
 
 	if err := r.db.Select(&tasks, stmt); err != nil {
 		log.Print(err)

@@ -2,43 +2,69 @@ package task
 
 import (
 	"github.com/IlyushaZ/check-domain/google-domain-checker/internal/entity"
+	"sync"
+	"time"
 )
+
+const MaxOutstanding = 100
 
 type Processor struct {
 	taskRepo Repository
 	checker  Checker
+	sleeper  Sleeper
+	sem      chan struct{}
 }
 
-func NewProcessor(taskRepo Repository, checker Checker) Processor {
+func NewProcessor(taskRepo Repository, checker Checker, sleeper Sleeper) Processor {
 	return Processor{
 		taskRepo: taskRepo,
 		checker:  checker,
+		sleeper:  sleeper,
+		sem:      make(chan struct{}, MaxOutstanding),
 	}
 }
 
-const MaxOutstanding = 100
+func (p Processor) Process() {
+	tasks := p.taskRepo.GetUnprocessed()
+	wg := &sync.WaitGroup{}
 
-var sem = make(chan int, MaxOutstanding)
+	for _, task := range tasks {
+		p.sem <- struct{}{}
 
-func (p Processor) Process(t <-chan entity.Task) {
-	for task := range t {
-		sem <- 1
+		wg.Add(1)
+		go func(task entity.Task, wg *sync.WaitGroup) {
+			defer wg.Done()
 
-		go func(task entity.Task) {
 			p.checker.Check(task)
-			<-sem
-		}(task)
+			task.Update()
+			p.taskRepo.Update(task)
+
+			<-p.sem
+		}(task, wg)
+	}
+	wg.Wait()
+
+	if len(tasks) == 0 {
+		p.sleeper.Sleep()
 	}
 }
 
-func (p Processor) SendUnprocessed(t chan<- entity.Task) {
-	for {
-		tasks := p.taskRepo.GetUnprocessed()
+type Sleeper interface {
+	Sleep()
+}
 
-		for _, task := range tasks {
-			t <- task
-			task.Update()
-			_ = p.taskRepo.Update(task)
-		}
+type minuteSleeper struct {
+	minutes     int
+	sleeperFunc func(time time.Duration)
+}
+
+func NewMinuteSleeper(minutes int, sleeperFunc func(time time.Duration)) Sleeper {
+	return minuteSleeper{
+		minutes:     minutes,
+		sleeperFunc: sleeperFunc,
 	}
+}
+
+func (s minuteSleeper) Sleep() {
+	s.sleeperFunc(time.Duration(s.minutes) * time.Minute)
 }

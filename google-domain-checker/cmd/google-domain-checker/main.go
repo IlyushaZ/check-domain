@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/IlyushaZ/check-domain/google-domain-checker/internal/entity"
 	internalErr "github.com/IlyushaZ/check-domain/google-domain-checker/internal/error"
 	"github.com/IlyushaZ/check-domain/google-domain-checker/internal/notifier"
 	"github.com/IlyushaZ/check-domain/google-domain-checker/internal/request"
@@ -16,6 +15,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 type config struct {
@@ -54,11 +54,14 @@ func main() {
 	taskProcessor := task.NewProcessor(
 		taskRepository,
 		task.NewGoogleChecker(requestRepository, search.NewGoogleSearcher(config.SerpStackAPIKey), amqpNotifier),
+		task.NewMinuteSleeper(1, time.Sleep),
 	)
 
-	taskChan := make(chan entity.Task)
-	go taskProcessor.Process(taskChan)
-	go taskProcessor.SendUnprocessed(taskChan)
+	go func() {
+		for {
+			taskProcessor.Process()
+		}
+	}()
 
 	handler := http.NewServeMux()
 	handler.HandleFunc("/tasks", internalErr.Handler(taskHandler.CreateTask).RespondError)
