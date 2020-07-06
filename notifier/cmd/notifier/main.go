@@ -80,7 +80,6 @@ func consume(url, queueName string, bot *tgbotapi.BotAPI) {
 		for m := range msgs {
 			var message message
 			_ = json.Unmarshal(m.Body, &message)
-			fmt.Println(message)
 
 			f, err := os.Open(chatIDsFile)
 			handleError(err)

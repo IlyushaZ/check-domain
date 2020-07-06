@@ -100,13 +100,15 @@ func TestService_Create(t *testing.T) {
 			}
 
 			if tc.expectedTaskRepoCalls != trm.calls {
-				t.Errorf("expected task repository to be called %d times, called %d",
+				t.Errorf(
+					"expected task repository to be called %d times, called %d",
 					tc.expectedTaskRepoCalls, trm.calls,
 				)
 			}
 
 			if tc.expectedRequestRepoCalls != rrm.calls {
-				t.Errorf("expected request repository to be called %d times, called %d",
+				t.Errorf(
+					"expected request repository to be called %d times, called %d",
 					tc.expectedRequestRepoCalls, rrm.calls,
 				)
 			}

@@ -83,15 +83,24 @@ func TestCreateTask(t *testing.T) {
 			handlerFunc.ServeHTTP(rec, req)
 
 			if tc.expectedCode != rec.Code {
-				t.Errorf("expected response code to be %d, got %d", tc.expectedCode, rec.Code)
+				t.Errorf(
+					"expected response code to be %d, got %d",
+					tc.expectedCode, rec.Code,
+				)
 			}
 
 			if tc.expectedBody != rec.Body.String() {
-				t.Errorf("expected response body to be %s, got %s", tc.expectedBody, rec.Body.String())
+				t.Errorf(
+					"expected response body to be %s, got %s",
+					tc.expectedBody, rec.Body.String(),
+				)
 			}
 
 			if tc.expectedServiceCalls != serviceMock.calls {
-				t.Errorf("expected %d service calls, %d made", tc.expectedServiceCalls, serviceMock.calls)
+				t.Errorf(
+					"expected %d service calls, %d made",
+					tc.expectedServiceCalls, serviceMock.calls,
+				)
 			}
 		})
 

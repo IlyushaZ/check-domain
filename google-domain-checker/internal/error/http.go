@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+const internalErrMessage = "something went wrong"
+
 type Handler func(http.ResponseWriter, *http.Request) HttpError
 
 func (fn Handler) RespondError(w http.ResponseWriter, r *http.Request) {
@@ -35,28 +37,28 @@ func (err APIError) Error() string {
 	return err.Message
 }
 
-func BadRequest(message string) APIError {
+func BadRequest(message string) HttpError {
 	return APIError{
 		Code:    http.StatusBadRequest,
 		Message: message,
 	}
 }
 
-func UnprocessableEntity(message string) APIError {
+func UnprocessableEntity(message string) HttpError {
 	return APIError{
 		Code:    http.StatusUnprocessableEntity,
 		Message: message,
 	}
 }
 
-func Internal() APIError {
+func Internal() HttpError {
 	return APIError{
 		Code:    http.StatusInternalServerError,
-		Message: "something went wrong",
+		Message: internalErrMessage,
 	}
 }
 
-func MethodNotAllowed(got, allowed string) APIError {
+func MethodNotAllowed(got, allowed string) HttpError {
 	return APIError{
 		Code:    http.StatusMethodNotAllowed,
 		Message: fmt.Sprintf("method %s is not allowed. allowed method: %s", got, allowed),
