@@ -24,7 +24,7 @@ func (r repository) Insert(task entity.Task) error {
 	stmt := "INSERT INTO tasks (id, domain, country, created_at, process_at) " +
 		"VALUES (:id, :domain, :country, :created_at, :process_at)"
 
-	_, err := r.db.NamedQuery(stmt, &task)
+	_, err := r.db.NamedExec(stmt, &task)
 
 	return err
 }
@@ -42,7 +42,7 @@ func (r repository) Update(task entity.Task) error {
 
 func (r repository) GetUnprocessed() []entity.Task {
 	var tasks []entity.Task
-	stmt := "SELECT * FROM tasks WHERE process_at <= NOW() LIMIT 200"
+	stmt := "SELECT * FROM tasks WHERE process_at <= NOW() LIMIT 400"
 
 	if err := r.db.Select(&tasks, stmt); err != nil {
 		log.Print(err)

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const MaxOutstanding = 100
+const MaxOutstanding = 200
 
 type Processor struct {
 	taskRepo Repository

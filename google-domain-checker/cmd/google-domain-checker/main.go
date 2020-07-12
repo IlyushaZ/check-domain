@@ -75,12 +75,16 @@ func main() {
 }
 
 func connectToDB(DBString string) (*sqlx.DB, error) {
-	conn, err := sqlx.Connect("postgres", DBString)
+	db, err := sqlx.Connect("postgres", DBString)
 	if err != nil {
 		return nil, err
 	}
 
-	return conn, nil
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(20)
+	db.SetConnMaxLifetime(time.Minute)
+
+	return db, nil
 }
 
 func connectToRabbitMQ(urlString string) (*amqp.Connection, error) {

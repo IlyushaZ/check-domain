@@ -11,25 +11,22 @@ type Notifier interface {
 
 type rabbitMQ struct {
 	connection *amqp.Connection
-	channel    *amqp.Channel
 	queueName  string
 }
 
 func NewRabbitMQ(connection *amqp.Connection, queueName string) (Notifier, error) {
-	channel, err := connection.Channel()
-	if err != nil {
-		return nil, err
-	}
-
 	return rabbitMQ{
 		connection: connection,
-		channel:    channel,
 		queueName:  queueName,
 	}, nil
 }
 
+//TODO: add error handling/logging!
 func (r rabbitMQ) Notify(domain, request string) {
-	q, _ := r.channel.QueueDeclare(
+	channel, _ := r.connection.Channel()
+	defer channel.Close()
+
+	q, _ := channel.QueueDeclare(
 		r.queueName,
 		false,
 		false,
@@ -45,7 +42,7 @@ func (r rabbitMQ) Notify(domain, request string) {
 		Request: request,
 	})
 
-	_ = r.channel.Publish(
+	_ = channel.Publish(
 		"",
 		q.Name,
 		false,
